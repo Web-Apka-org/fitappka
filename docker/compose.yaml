@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: volume
+        source: postgresdb
+        target: /var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+  django-server:
+    build: .
+    image: django-server
+    container_name: django-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../.:/app
+    tty: true
+    depends_on:
+      - db
+
+volumes:
+  postgresdb:

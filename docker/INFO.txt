@@ -1,0 +1,4 @@
+* start constainers ->  docker compose up -d 
+* run django server ->  ./runserver.sh
+* stop containers   ->  docker compose down
+* into django shell ->  ./shell.sh
