@@ -23,7 +23,10 @@ class ConsumedFood(models.Model):
         on_delete=models.CASCADE
     )
 
-    food = models.ManyToManyField(Food)
+    food = models.ForeignKey(
+        Food,
+        on_delete=models.CASCADE
+    )
 
     date_eating = models.DateTimeField()
 
