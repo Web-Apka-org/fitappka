@@ -4,6 +4,9 @@
 <form method = "POST">
     {% csrf_token %}
     {{ form.as_p }}
+    {% if status  %}
+    <p>Invalid login or password</p>
+    {% endif %}
     <button type = "submit" >Login</button>
     <a href = "{% url 'signup_user' %}">Dont have account,create one!</a>
 </form>
