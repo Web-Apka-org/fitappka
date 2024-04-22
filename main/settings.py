@@ -12,7 +12,7 @@ SECRET_KEY = 'django-insecure-98*-u5_tptzspte%_d5-!$4wb)_)tdek5534k#p(!y7&*#t%ch
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'food',
     'recipies',
     'user_rating',
+    'summary',
     'corsheaders',
     'rest_framework',
 ]

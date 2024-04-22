@@ -39,14 +39,20 @@ class UserLoginView(View):
         return render(request, self.template_name, {'form': form})
     
     def post(self, request, *args, **kwargs):
+        status = True
         form = self.form_class(request.POST)
         if form.is_valid:
             username = form.data['username']
             password = form.data['password']
             user = authenticate(request, username=username, password=password)
+            status_code = 404 if status else 200
             if user:
                 login(request, user)
                 return redirect('user_data')
+            elif user is None:
+                return render(request, self.template_name, {'form': form, 'status': status} ,status = status_code)
+
+
         return render(request, self.template_name, {'form': form})
     
 class UserLogoutView(LogoutView):
