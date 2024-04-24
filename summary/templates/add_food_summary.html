@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dodaj Podsumowanie Jedzenia</title>
+</head>
+<body>
+    <h1>Dodaj Podsumowanie Jedzenia</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Dodaj</button>
+    </form>
+</body>
+</html>
