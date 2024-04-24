@@ -55,7 +55,7 @@ class FoodItemView(viewsets.ModelViewSet):
             else:
 
                 return queryset
-
+        queryset = Food.objects.all()
         return queryset
     def list(self, request, *args, **kwargs):
         id = self.request.user.id
