@@ -1,8 +1,8 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import ConsumedFoodView
 
 urlpatterns = [
-    path('consumed_food/', ConsumedFoodView.as_view())
+    path('consumed/', ConsumedFoodView.as_view()),
 #     path('/', ), # lista Jedzenia w bazie danych
 #     path('/<int:pk>/', ),
 #     path('/<int:pk>/microelements/', ),
