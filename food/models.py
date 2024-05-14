@@ -4,6 +4,7 @@ from django.db import models
 
 kwargs = {'max_digits': 6, 'decimal_places': 2}
 
+
 class Food(models.Model):
     name = models.CharField(max_length=80)
     energy = models.IntegerField()
