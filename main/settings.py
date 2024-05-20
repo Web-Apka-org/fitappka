@@ -100,12 +100,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,3 +119,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "account.User"
 
 CORS_ALLOW_ALL_ORIGINS = False
+
+LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+
+        'formatters': {
+            'default': {
+                'format': '{levelname}::({name}) {funcName}:{lineno}: {message}',
+                'style': '{',
+            }
+        },
+
+        'handlers': {
+            'console': {
+                'level': 'NOTSET',
+                'class': 'logging.StreamHandler',
+                'formatter': 'default'
+            }
+        },
+
+        'root': {
+            'handlers': ['console'],
+            'level': 'NOTSET'
+        },
+
+        'loggers': {
+            'simple-login-register-django.account': {
+                'handlers': ['console']
+            },
+            'simple-login-register-django.main': {
+                'handlers': ['console']
+            }
+        }
+}
