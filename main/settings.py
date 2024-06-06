@@ -126,14 +126,14 @@ LOGGING = {
 
         'formatters': {
             'default': {
-                'format': '{levelname}::({name}) {funcName}:{lineno}: {message}',
+                'format': '({asctime}) {levelname}:: {message}',
                 'style': '{',
             }
         },
 
         'handlers': {
             'console': {
-                'level': 'NOTSET',
+                'level': 'DEBUG',
                 'class': 'logging.StreamHandler',
                 'formatter': 'default'
             }
@@ -145,10 +145,28 @@ LOGGING = {
         },
 
         'loggers': {
-            'simple-login-register-django.account': {
+            'fitappka.main': {
                 'handlers': ['console']
             },
-            'simple-login-register-django.main': {
+            'fitappka.account': {
+                'handlers': ['console']
+            },
+            'fitappka.food': {
+                'handlers': ['console']
+            },
+            'fitappka.plan': {
+                'handlers': ['console']
+            },
+            'fitappka.recipies': {
+                'handlers': ['console']
+            },
+            'fitappka.summary': {
+                'handlers': ['console']
+            },
+            'fitappka.user_rating': {
+                'handlers': ['console']
+            },
+            'fitappka.Token': {
                 'handlers': ['console']
             }
         }

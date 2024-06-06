@@ -22,7 +22,10 @@ class JWTPermission(BasePermission):
     '''
     JWT based authentication.
     '''
+
     def has_permission(self, request, view) -> True | False:
+        logger = logging.getLogger(__name__)
+        addr = request.META['REMOTE_ADDR']
         token = str(request.META['HTTP_TOKEN'])
 
         try:
@@ -35,21 +38,21 @@ class JWTPermission(BasePermission):
             header = decoded_token['header']
 
             if 'user_id' not in header:
-                # logging
+                logger.error(f'{addr} :: No \'user_id\' in token header')
                 return False
 
             if 'for' not in header:
-                # logging
+                logger.error(f'{addr} :: No \'for\' in token header')
                 return False
 
             if header['for'] != 'access':
-                # logging
+                logger.error(f'{addr} :: This is not acces token.')
                 return False
         except InvalidTokenError as ex:
-            # logging
+            logger.error(f'{addr} :: {ex}')
             return False
         except ExpiredSignatureError as ex:
-            # logging
+            logger.error(f'{addr} :: {ex}')
             return False
 
         return True
