@@ -1,4 +1,5 @@
 import sys
+from datetime import timedelta
 from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 
@@ -25,6 +26,10 @@ if not PUBLIC_KEY:
     sys.exit(
         'Error:: Failed to load public key from main/keys/EdDSA.pub. Aborting...'
     )
+
+# expire time for keys
+JWT_EXPIRE = timedelta(days=7)
+JWT_EXPIRE_REFRESH = timedelta(days=8)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
