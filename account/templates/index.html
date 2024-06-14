@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Your page{% endblock %}
+
+{% block content %}
+
+    {% if user.is_authenticated %}
+    <p>{{user}}</p>
+    <form action="{% url 'logout_user' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-info">Logout</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login_user' %}">Login</a>
+    {% endif %}
+
+    {% for data in user_data %}
+    <tr>
+        {{user_data}}
+        <td><a href = "{% url 'update_user' user.id %}">Edit</a></td>
+
+    {% empty %}
+        <h3>No user credentials</h3>
+    {% endfor %}
+    </tr>
+{% endblock %}

@@ -31,7 +31,6 @@ class ConsumedFood(models.Model):
 
     date_eating = models.DateTimeField()
 
-
 class Microelements(models.Model):
     food = models.OneToOneField(
         Food,

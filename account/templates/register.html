@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+
+    {{form.as_p}}
+
+    <button type = "submit">Signup</button>
+    <a href = "{% url 'login_user' %}">Already have account</a>
+
+</form>
+{% endblock %}

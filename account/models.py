@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext as _
 
@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 class User(AbstractUser):
     first_name = None
     last_name = None
+
 
     username = models.CharField(
         _("username"),
@@ -20,3 +21,5 @@ class User(AbstractUser):
             "unique": _("A user with that username already exists."),
         },
     )
+
+
