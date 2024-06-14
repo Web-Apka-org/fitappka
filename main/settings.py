@@ -1,4 +1,31 @@
+import sys
 from pathlib import Path
+from cryptography.hazmat.primitives import serialization
+
+# load keys from files
+PRIVATE_KEY: str = None
+with open('keys/EdDSA', 'rb') as file:
+    PRIVATE_KEY = serialization.load_ssh_private_key(
+        file.read(),
+        password=None
+    )
+
+if not PRIVATE_KEY:
+    sys.exit(
+        'Error:: Failed to load private key from main/keys/EdDSA. Aborting...'
+    )
+
+PUBLIC_KEY: str = None
+with open('keys/EdDSA.pub', 'rb') as file:
+    PUBLIC_KEY = serialization.load_ssh_public_key(
+        file.read()
+    )
+
+if not PUBLIC_KEY:
+    sys.exit(
+        'Error:: Failed to load public key from main/keys/EdDSA.pub. Aborting...'
+    )
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,12 +127,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,3 +146,55 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "account.User"
 
 CORS_ALLOW_ALL_ORIGINS = False
+
+LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+
+        'formatters': {
+            'default': {
+                'format': '({asctime}) {levelname}:: {message}',
+                'style': '{',
+            }
+        },
+
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'default'
+            }
+        },
+
+        'root': {
+            'handlers': ['console'],
+            'level': 'NOTSET'
+        },
+
+        'loggers': {
+            'fitappka.main': {
+                'handlers': ['console']
+            },
+            'fitappka.account': {
+                'handlers': ['console']
+            },
+            'fitappka.food': {
+                'handlers': ['console']
+            },
+            'fitappka.plan': {
+                'handlers': ['console']
+            },
+            'fitappka.recipies': {
+                'handlers': ['console']
+            },
+            'fitappka.summary': {
+                'handlers': ['console']
+            },
+            'fitappka.user_rating': {
+                'handlers': ['console']
+            },
+            'fitappka.Token': {
+                'handlers': ['console']
+            }
+        }
+}
