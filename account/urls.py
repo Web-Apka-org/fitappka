@@ -1,8 +1,9 @@
 from django.urls import path
+from .views import UserTokenView
 
-# urlpatterns = [
+urlpatterns = [
 #     path('/', ), # rest api: informacje o użytkowniku
-#     path('/login/', ),
+    path('token/', UserTokenView.as_view()),
 #     path('/logout/', ),
 #     path('/signup/', ),
-# ]
+]

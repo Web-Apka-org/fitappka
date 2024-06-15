@@ -5,7 +5,7 @@ from cryptography.hazmat.primitives import serialization
 
 # load keys from files
 PRIVATE_KEY: str = None
-with open('keys/EdDSA', 'rb') as file:
+with open('main/keys/EdDSA', 'rb') as file:
     PRIVATE_KEY = serialization.load_ssh_private_key(
         file.read(),
         password=None
@@ -17,7 +17,7 @@ if not PRIVATE_KEY:
     )
 
 PUBLIC_KEY: str = None
-with open('keys/EdDSA.pub', 'rb') as file:
+with open('main/keys/EdDSA.pub', 'rb') as file:
     PUBLIC_KEY = serialization.load_ssh_public_key(
         file.read()
     )
@@ -28,8 +28,8 @@ if not PUBLIC_KEY:
     )
 
 # expire time for keys
-JWT_EXPIRE = timedelta(days=7)
-JWT_EXPIRE_REFRESH = timedelta(days=8)
+JWT_TOKEN_EXPIRE = timedelta(days=7)
+JWT_REFRESH_TOKEN_EXPIRE = timedelta(days=8)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -165,7 +165,7 @@ LOGGING = {
 
         'handlers': {
             'console': {
-                'level': 'DEBUG',
+                'level': 'NOTSET',
                 'class': 'logging.StreamHandler',
                 'formatter': 'default'
             }
