@@ -32,11 +32,10 @@ JWT_TOKEN_EXPIRE = timedelta(days=7)
 JWT_REFRESH_TOKEN_EXPIRE = timedelta(days=8)
 
 
+AUTHENTICATION_BACKENDS = ['main.auth_backend.AuthBackend']
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-98*-u5_tptzspte%_d5-!$4wb)_)tdek5534k#p(!y7&*#t%ch'
