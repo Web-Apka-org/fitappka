@@ -109,7 +109,7 @@ def generate(user_id: int) -> (str, str):
 
 def decode(token: str) -> dict:
     '''
-    Return Decoded token.
+    Return decoded token.
 
     Throws WrongTokenError.
     '''
@@ -125,6 +125,26 @@ def decode(token: str) -> dict:
         raise WrongTokenError(ex)
 
     return decoded
+
+
+def decode_header(token: str) -> dict:
+    '''
+    Return only decoded header token.
+
+    Throws WrongTokenError.
+    '''
+    decoded: dict
+
+    try:
+        decoded = jwt.api_jwt.decode_complete(
+            token,
+            settings.PUBLIC_KEY,
+            algorithms=['EdDSA']
+        )
+    except InvalidTokenError as ex:
+        raise WrongTokenError(ex)
+
+    return decoded['header']
 
 
 def get_user(token: str) -> User:
