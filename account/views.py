@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate
 from account import Token
 
 
-class UserTokenView(APIView):
+class TokenView(APIView):
     def post(self, request, *args, **kwargs):
         if not request.POST.keys() >= {'username', 'email', 'password'}:
             return Response(
@@ -26,8 +26,6 @@ class UserTokenView(APIView):
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
-
-        logging.info(f'{username} {email} {password}')
 
         user = authenticate(username=username, email=email, password=password)
         if user is None:
@@ -44,6 +42,49 @@ class UserTokenView(APIView):
                 'access': access,
                 'refresh': refresh
             })
+
+
+class RefreshTokenView(APIView):
+    permission_classes = [Token.JWTPermission]
+
+    def get(self, request, *args, **kwargs):
+        if 'HTTP_REFRESH_TOKEN' not in request.META:
+            return Response({
+                'Error': 'No refresh token in HTTP header.'
+            })
+
+        token = request.META['HTTP_REFRESH_TOKEN']
+
+        header: dict
+        try:
+            decoded = Token.decode(token)
+            header = decoded['header']
+        except Token.WrongTokenError as ex:
+            return Response({
+                'Error': str(ex)
+            })
+
+        if header['for'] != 'refresh':
+            return Response({
+                'Error': 'Wrong token type, only refresh token accepted'
+            })
+
+        user_id: int
+        try:
+            user = User.objects.get(pk=header['user_id'])
+            user_id = user.id
+        except User.ObjectDoesNotExist:
+            Response({
+                'Error': 'User of this token does not exist.'
+            })
+
+        access, refresh = Token.generate(user_id)
+
+        return Response({
+            'access': access,
+            'refresh': refresh
+        })
+
 
 # class RegisterPage(FormView):
 #     template_name = "register.html"

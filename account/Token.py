@@ -25,6 +25,11 @@ class JWTPermission(BasePermission):
 
     def has_permission(self, request, view) -> True | False:
         addr = request.META['REMOTE_ADDR']
+
+        if 'HTTP_TOKEN' not in request.META:
+            logging.error(f'{addr} :: No token in HTTP header.')
+            return False
+
         token = str(request.META['HTTP_TOKEN'])
 
         try:
@@ -100,6 +105,21 @@ def generate(user_id: int) -> (str, str):
     )
 
     return access, refresh
+
+
+def decode(token: str) -> dict:
+    decoded: dict
+
+    try:
+        decoded = jwt.api_jwt.decode_complete(
+            token,
+            settings.PUBLIC_KEY,
+            algorithms=['EdDSA']
+        )
+    except InvalidTokenError as ex:
+        raise WrongTokenError(ex)
+
+    return decoded
 
 
 def get_user(token: str) -> User:
