@@ -50,7 +50,7 @@ class JWTPermission(BasePermission):
                 return False
 
             if header['for'] != 'access':
-                logging.error(f'{addr} :: This is not acces token.')
+                logging.error(f'{addr} :: This is not access token.')
                 return False
         except InvalidTokenError as ex:
             logging.error(f'{addr} :: {ex}')
@@ -108,6 +108,11 @@ def generate(user_id: int) -> (str, str):
 
 
 def decode(token: str) -> dict:
+    '''
+    Return Decoded token.
+
+    Throws WrongTokenError.
+    '''
     decoded: dict
 
     try:

@@ -49,9 +49,12 @@ class RefreshTokenView(APIView):
 
     def get(self, request, *args, **kwargs):
         if 'HTTP_REFRESH_TOKEN' not in request.META:
-            return Response({
-                'Error': 'No refresh token in HTTP header.'
-            })
+            return Response(
+                {
+                    'Error': 'No refresh token in HTTP header.'
+                },
+                status=403
+            )
 
         token = request.META['HTTP_REFRESH_TOKEN']
 
@@ -60,23 +63,32 @@ class RefreshTokenView(APIView):
             decoded = Token.decode(token)
             header = decoded['header']
         except Token.WrongTokenError as ex:
-            return Response({
-                'Error': str(ex)
-            })
+            return Response(
+                {
+                    'Error': str(ex)
+                },
+                status=403
+            )
 
         if header['for'] != 'refresh':
-            return Response({
-                'Error': 'Wrong token type, only refresh token accepted'
-            })
+            return Response(
+                {
+                    'Error': 'Wrong token type, only refresh token accepted'
+                },
+                status=403
+            )
 
         user_id: int
         try:
             user = User.objects.get(pk=header['user_id'])
             user_id = user.id
         except User.ObjectDoesNotExist:
-            Response({
-                'Error': 'User of this token does not exist.'
-            })
+            Response(
+                {
+                    'Error': 'User of this token does not exist.'
+                },
+                status=403
+            )
 
         access, refresh = Token.generate(user_id)
 
