@@ -1,10 +1,11 @@
 import sys
+from datetime import timedelta
 from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 
 # load keys from files
 PRIVATE_KEY: str = None
-with open('keys/EdDSA', 'rb') as file:
+with open('main/keys/EdDSA', 'rb') as file:
     PRIVATE_KEY = serialization.load_ssh_private_key(
         file.read(),
         password=None
@@ -16,7 +17,7 @@ if not PRIVATE_KEY:
     )
 
 PUBLIC_KEY: str = None
-with open('keys/EdDSA.pub', 'rb') as file:
+with open('main/keys/EdDSA.pub', 'rb') as file:
     PUBLIC_KEY = serialization.load_ssh_public_key(
         file.read()
     )
@@ -26,12 +27,15 @@ if not PUBLIC_KEY:
         'Error:: Failed to load public key from main/keys/EdDSA.pub. Aborting...'
     )
 
+# expire time for keys
+JWT_TOKEN_EXPIRE = timedelta(days=7)
+JWT_REFRESH_TOKEN_EXPIRE = timedelta(days=8)
+
+
+AUTHENTICATION_BACKENDS = ['main.auth_backend.AuthBackend']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-98*-u5_tptzspte%_d5-!$4wb)_)tdek5534k#p(!y7&*#t%ch'
@@ -161,7 +165,7 @@ LOGGING = {
 
         'handlers': {
             'console': {
-                'level': 'DEBUG',
+                'level': 'NOTSET',
                 'class': 'logging.StreamHandler',
                 'formatter': 'default'
             }

@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
+import secrets
 import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
-import secrets
 
 from django.conf import settings
 from rest_framework.permissions import BasePermission
@@ -24,8 +24,12 @@ class JWTPermission(BasePermission):
     '''
 
     def has_permission(self, request, view) -> True | False:
-        logger = logging.getLogger(__name__)
         addr = request.META['REMOTE_ADDR']
+
+        if 'HTTP_TOKEN' not in request.META:
+            logging.error(f'{addr} :: No token in HTTP header.')
+            return False
+
         token = str(request.META['HTTP_TOKEN'])
 
         try:
@@ -38,36 +42,33 @@ class JWTPermission(BasePermission):
             header = decoded_token['header']
 
             if 'user_id' not in header:
-                logger.error(f'{addr} :: No \'user_id\' in token header')
+                logging.error(f'{addr} :: No \'user_id\' in token header.')
                 return False
 
             if 'for' not in header:
-                logger.error(f'{addr} :: No \'for\' in token header')
+                logging.error(f'{addr} :: No \'for\' in token header.')
                 return False
 
             if header['for'] != 'access':
-                logger.error(f'{addr} :: This is not acces token.')
+                logging.error(f'{addr} :: This is not access token.')
                 return False
         except InvalidTokenError as ex:
-            logger.error(f'{addr} :: {ex}')
+            logging.error(f'{addr} :: {ex}')
             return False
         except ExpiredSignatureError as ex:
-            logger.error(f'{addr} :: {ex}')
+            logging.error(f'{addr} :: {ex}')
             return False
 
         return True
 
 
-def generate(user_id: int = None) -> (str, str):
+def generate(user_id: int) -> (str, str):
     '''
     Generate two tokens, first for authenticated access and second
     for generate new tokens (refresh).
 
     Throws TypeError.
     '''
-    if user_id is None:
-        raise TypeError('user_id is None')
-
     if not isinstance(user_id, int):
         raise TypeError('\'user_id\' must be int.')
 
@@ -82,7 +83,7 @@ def generate(user_id: int = None) -> (str, str):
     # access token
     access = jwt.encode(
         {'exp': access_expire},
-        settings.PRIVIATE_KEY,
+        settings.PRIVATE_KEY,
         algorithm='EdDSA',
         headers={
             'user_id': user_id,
@@ -94,6 +95,7 @@ def generate(user_id: int = None) -> (str, str):
     # refresh token
     refresh = jwt.encode(
         {'exp': refresh_expire},
+        settings.PRIVATE_KEY,
         algorithm='EdDSA',
         headers={
             'user_id': user_id,
@@ -105,15 +107,32 @@ def generate(user_id: int = None) -> (str, str):
     return access, refresh
 
 
-def get_user(token: str = None) -> User:
+def decode(token: str) -> dict:
+    '''
+    Return Decoded token.
+
+    Throws WrongTokenError.
+    '''
+    decoded: dict
+
+    try:
+        decoded = jwt.api_jwt.decode_complete(
+            token,
+            settings.PUBLIC_KEY,
+            algorithms=['EdDSA']
+        )
+    except InvalidTokenError as ex:
+        raise WrongTokenError(ex)
+
+    return decoded
+
+
+def get_user(token: str) -> User:
     '''
     Return User model instance from token.
 
     Throws TypeError and UserDoesNotExist exceptions.
     '''
-    if token is None:
-        raise TypeError('token is None')
-
     if not isinstance(token, str):
         raise TypeError('token must be str.')
 
