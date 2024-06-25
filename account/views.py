@@ -1,16 +1,20 @@
 import logging
 
 from django.shortcuts import redirect, render
+from rest_framework import mixins
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import User
+from .serializers import UserSerializer
 
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate
 
 from account import Token
+from account.Token import JWTPermission
 
 
 class TokenView(APIView):
@@ -45,7 +49,7 @@ class TokenView(APIView):
 
 
 class RefreshTokenView(APIView):
-    permission_classes = [Token.JWTPermission]
+    permission_classes = [JWTPermission]
 
     def get(self, request, *args, **kwargs):
         if 'HTTP_REFRESH_TOKEN' not in request.META:
@@ -58,10 +62,29 @@ class RefreshTokenView(APIView):
 
         token = request.META['HTTP_REFRESH_TOKEN']
 
-        header: dict
+        user_id: int
         try:
-            decoded = Token.decode(token)
-            header = decoded['header']
+            header = Token.decoded_header(token)
+
+            if header['for'] != 'refresh':
+                return Response(
+                    {
+                        'Error': 'Wrong token type, only refresh token accepted'
+                    },
+                    status=403
+                )
+
+            user_id = header['user_id']
+
+            # check if user of this id still exist
+            User.objects.get(pk=user_id)
+
+            access, refresh = Token.generate(user_id)
+
+            return Response({
+                'access': access,
+                'refresh': refresh
+            })
         except Token.WrongTokenError as ex:
             return Response(
                 {
@@ -69,19 +92,6 @@ class RefreshTokenView(APIView):
                 },
                 status=403
             )
-
-        if header['for'] != 'refresh':
-            return Response(
-                {
-                    'Error': 'Wrong token type, only refresh token accepted'
-                },
-                status=403
-            )
-
-        user_id: int
-        try:
-            user = User.objects.get(pk=header['user_id'])
-            user_id = user.id
         except User.ObjectDoesNotExist:
             Response(
                 {
@@ -90,12 +100,26 @@ class RefreshTokenView(APIView):
                 status=403
             )
 
-        access, refresh = Token.generate(user_id)
 
-        return Response({
-            'access': access,
-            'refresh': refresh
-        })
+class UserDataView(APIView):
+    permission_classes = [JWTPermission]
+    serializer_class = UserSerializer
+
+    def get(self, request, *args, **kwargs):
+        token = self.request.META['HTTP_TOKEN']
+
+        try:
+            user = Token.get_user(token)
+            user_data = UserSerializer(user)
+
+            return Response(user_data.data)
+        except Token.WrongTokenError as ex:
+            return Response(
+                {
+                    'Error': str(ex)
+                },
+                status=403
+            )
 
 
 # class RegisterPage(FormView):
