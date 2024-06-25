@@ -1,6 +1,6 @@
 import logging
 
-from django.shortcuts import redirect, render
+from django.contrib.auth import authenticate
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.response import Response
@@ -8,10 +8,6 @@ from rest_framework.views import APIView
 
 from .models import User
 from .serializers import UserSerializer
-
-from django.views import View
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
 
 from account import Token
 from account.Token import JWTPermission

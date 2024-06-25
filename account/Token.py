@@ -7,7 +7,7 @@ from jwt.exceptions import InvalidTokenError
 from django.conf import settings
 from rest_framework.permissions import BasePermission
 
-from account.models import User
+from .models import User
 
 
 class WrongTokenError(Exception):

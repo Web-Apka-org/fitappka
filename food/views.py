@@ -1,20 +1,22 @@
 import logging
 from datetime import datetime
 
-from django.http import JsonResponse
-from rest_framework import mixins, generics, status
+from rest_framework import mixins, generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-from .models import ConsumedFood, Food
+from account import Token
+from account.Token import JWTPermission
+from .models import ConsumedFood
 from .serializers import ConsumedFoodSerializer
-from .utils import getDatetime
+from .utils import getDatetime, WrongDatetime
 
 
-class ConsumedFoodView(mixins.ListModelMixin,
-                       mixins.CreateModelMixin,
-                       generics.GenericAPIView):
+class ConsumedFoodView(mixins.CreateModelMixin, APIView):
+    permission_classes = [JWTPermission]
     serializer_class = ConsumedFoodSerializer
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
         '''
             Return list consumed food from specify date.
 
@@ -22,32 +24,77 @@ class ConsumedFoodView(mixins.ListModelMixin,
             If only 'to' parameter passed then only from date in 'to'.
             If two paramters passed then in date range 'from' 'to'.
             If no GET parameters are passed then return list consumed food only
-            from today (server date!). 
+            from today (server date!).
 
             It's recommended to always pass date in 'to' because date from
             server might be not the same as on client !
+
+            Time format: '%Y-%m-%d'
         '''
         date_from = datetime.now().replace(hour=0, minute=0, second=0)
         date_to = datetime.now().replace(hour=23, minute=59, second=59)
 
-        if 'from' in self.request.GET:
-            date_from = getDatetime(self.request.GET['from'])
-                    
-        if 'to' in self.request.GET:
-            date_to = getDatetime(self.request.GET['to']) \
-                            .replace(hour=23, minute=59, second=0)
+        try:
+            if 'from' in request.GET:
+                date_from = getDatetime(request.GET['from'])
 
-            if not 'from' in self.request.GET:
-                date_from = getDatetime(self.request.GET['to'][:10])
+            if 'to' in request.GET:
+                date_to = getDatetime(request.GET['to']) \
+                            .replace(hour=23, minute=59, second=59)
+                if 'from' not in request.GET:
+                    date_from = getDatetime(request.GET['to'])
 
-        return ConsumedFood.objects. \
-                filter(date_eating__range=(date_from, date_to))
+            token = request.META['HTTP_TOKEN']
+            user = Token.get_user(token)
+            user_id = user.id
+        except (
+                Token.WrongTokenError,
+                Token.UserDoesNotExist,
+                WrongDatetime
+        ) as ex:
+            return Response({
+                'Error': str(ex)
+            })
+        else:
+            data = ConsumedFood.objects.filter(
+                user_id=user_id,
+                date_eating__range=(date_from, date_to)
+            )
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+            context = ConsumedFoodSerializer(data, many=True)
+            return Response(context.data)
 
     def post(self, request, *args, **kwargs):
-        date_eating = datetime.strptime(request.POST['date_eating'],
-                                        '%Y-%m-%d,%H:%M')
+        try:
+            token = request.META['HTTP_TOKEN']
+            Token.get_user(token)
+        except (
+                Token.WrongTokenError,
+                Token.UserDoesNotExist
+        ) as ex:
+            return Response(
+                {
+                    'Error': str(ex)
+                },
+                status=403
+            )
+
+        if len(request.POST['date_eating']) != 16:
+            return Response(
+                {
+                    'Error': 'Incorrect date format. (accepted: %Y-%m-%d,%H:%M)'
+                },
+                status=403
+            )
 
         return self.create(request, *args, **kwargs)
+
+    # only for testing
+    def put(self, request, *args, **kwargs):
+        token = request.META['HTTP_TOKEN']
+        user = Token.get_user(token)
+        data = ConsumedFoodSerializer(
+            ConsumedFood.objects.filter(user_id=user.id),
+            many=True
+        )
+        return Response(data.data)

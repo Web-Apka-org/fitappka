@@ -1,17 +1,19 @@
 from datetime import datetime
 
 
-def getDatetime(date_str):
+class WrongDatetime(Exception):
+    pass
+
+
+def getDatetime(date_str: str) -> datetime | None:
     len_date_str = len(date_str)
 
     try:
         if len_date_str == 10:
             date = datetime.strptime(date_str, '%Y-%m-%d')
-        elif len_date_str == 16:
-            date = datetime.strptime(date_str, '%Y-%m-%d,%H:%M')
         else:
-            return None
-    except ValueError as ve:
-        return None
-
-    return date
+            raise ValueError('Incorrect date format. (accepted: %Y-%m-%d)')
+    except ValueError as ex:
+        raise WrongDatetime(ex)
+    else:
+        return date
