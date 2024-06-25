@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 import secrets
 import jwt
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+from jwt.exceptions import InvalidTokenError
 
 from django.conf import settings
 from rest_framework.permissions import BasePermission
@@ -30,16 +30,11 @@ class JWTPermission(BasePermission):
             logging.error(f'{addr} :: No token in HTTP header.')
             return False
 
-        token = str(request.META['HTTP_TOKEN'])
+        token = request.META['HTTP_TOKEN']
+        header: dict
 
         try:
-            decoded_token = jwt.api_jwt.decode_complete(
-                token,
-                settings.PUBLIC_KEY,
-                algorithms=['EdDSA']
-            )
-
-            header = decoded_token['header']
+            header = decode_header(token)
 
             if 'user_id' not in header:
                 logging.error(f'{addr} :: No \'user_id\' in token header.')
@@ -55,11 +50,8 @@ class JWTPermission(BasePermission):
         except InvalidTokenError as ex:
             logging.error(f'{addr} :: {ex}')
             return False
-        except ExpiredSignatureError as ex:
-            logging.error(f'{addr} :: {ex}')
-            return False
-
-        return True
+        else:
+            return True
 
 
 def generate(user_id: int) -> (str, str):
@@ -113,8 +105,6 @@ def decode(token: str) -> dict:
 
     Throws WrongTokenError.
     '''
-    decoded: dict
-
     try:
         decoded = jwt.api_jwt.decode_complete(
             token,
@@ -123,8 +113,8 @@ def decode(token: str) -> dict:
         )
     except InvalidTokenError as ex:
         raise WrongTokenError(ex)
-
-    return decoded
+    else:
+        return decoded
 
 
 def decode_header(token: str) -> dict:
@@ -133,8 +123,6 @@ def decode_header(token: str) -> dict:
 
     Throws WrongTokenError.
     '''
-    decoded: dict
-
     try:
         decoded = jwt.api_jwt.decode_complete(
             token,
@@ -143,8 +131,8 @@ def decode_header(token: str) -> dict:
         )
     except InvalidTokenError as ex:
         raise WrongTokenError(ex)
-
-    return decoded['header']
+    else:
+        return decoded['header']
 
 
 def get_user(token: str) -> User:
@@ -156,12 +144,12 @@ def get_user(token: str) -> User:
     if not isinstance(token, str):
         raise TypeError('token must be str.')
 
-    header = jwt.get_unverified_header(token)
-    user: User
-
     try:
+        header = decode_header(token)
         user = User.objects.get(pk=header['user_id'])
+    except InvalidTokenError as ex:
+        raise WrongTokenError(ex)
     except User.ObjectDoesNotExist:
         raise UserDoesNotExist('User does not exist.')
-
-    return user
+    else:
+        return user
