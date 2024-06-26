@@ -5,7 +5,7 @@ from jwt.exceptions import InvalidTokenError
 
 from django.conf import settings
 
-from .models import User
+from account.models import User
 from .exceptions import WrongTokenError, UserDoesNotExist
 
 

@@ -4,7 +4,7 @@ from jwt import InvalidTokenError
 from rest_framework.permissions import BasePermission
 
 from account.models import User
-from .utils import decode_header
+from . import Token
 
 
 class JWTPermission(BasePermission):
@@ -23,7 +23,7 @@ class JWTPermission(BasePermission):
         header: dict
 
         try:
-            header = decode_header(token)
+            header = Token.decode_header(token)
 
             # check if user still exist
             User.objects.get(pk=header['user_id'])

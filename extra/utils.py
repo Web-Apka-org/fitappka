@@ -1,5 +1,5 @@
 from datetime import datetime
-from .exceptions import WrongDatetime
+from .exceptions import WrongDateFormat
 
 
 def getDatetime(date_str: str) -> datetime | None:
@@ -11,6 +11,6 @@ def getDatetime(date_str: str) -> datetime | None:
         else:
             raise ValueError('Incorrect date format. (accepted: %Y-%m-%d)')
     except ValueError as ex:
-        raise WrongDatetime(ex)
+        raise WrongDateFormat(ex)
     else:
         return date

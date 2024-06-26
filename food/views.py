@@ -4,12 +4,13 @@ from rest_framework import mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from account import Token
-from extra.Token import JWTPermission
 from .models import ConsumedFood
 from .serializers import ConsumedFoodSerializer
+
+from extra import Token
+from extra.permissions import JWTPermission
 from extra.utils import getDatetime
-from extra.exceptions import WrongDatetime
+from extra.exceptions import WrongTokenError, WrongDateFormat
 
 
 class ConsumedFoodView(mixins.CreateModelMixin, APIView):
@@ -18,18 +19,18 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
 
     def get(self, request, *args, **kwargs):
         '''
-            Return list consumed food from specify date.
+        Return list consumed food from specify date.
 
-            If only 'from' parameter passed then in date range 'from' to today.
-            If only 'to' parameter passed then only from date in 'to'.
-            If two paramters passed then in date range 'from' 'to'.
-            If no GET parameters are passed then return list consumed food only
-            from today (server date!).
+        If only 'from' parameter passed then in date range 'from' to today.
+        If only 'to' parameter passed then only from date in 'to'.
+        If two paramters passed then in date range 'from' 'to'.
+        If no GET parameters are passed then return list consumed food only
+        from today (server date!).
 
-            It's recommended to always pass date in 'to' because date from
-            server might be not the same as on client !
+        It's recommended to always pass date in 'to' because date from
+        server might be not the same as on client !
 
-            Date format: '%Y-%m-%d'
+        Date format: '%Y-%m-%d'
         '''
         date_from = datetime.now().replace(hour=0, minute=0, second=0)
         date_to = datetime.now().replace(hour=23, minute=59, second=59)
@@ -48,8 +49,8 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             user = Token.get_user(token)
             user_id = user.id
         except (
-            Token.WrongTokenError,
-            WrongDatetime
+            WrongTokenError,
+            WrongDateFormat
         ) as ex:
             return Response({
                 'Error': str(ex)
@@ -68,8 +69,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             token = request.META['HTTP_TOKEN']
             Token.get_user(token)
         except (
-                Token.WrongTokenError,
-                Token.UserDoesNotExist
+            WrongTokenError
         ) as ex:
             return Response(
                 {
