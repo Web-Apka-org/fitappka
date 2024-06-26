@@ -36,6 +36,9 @@ class JWTPermission(BasePermission):
         try:
             header = decode_header(token)
 
+            # check if user still exist
+            User.objects.get(pk=header['user_id'])
+
             if 'user_id' not in header:
                 logging.error(f'{addr} :: No \'user_id\' in token header.')
                 return False
@@ -49,6 +52,9 @@ class JWTPermission(BasePermission):
                 return False
         except InvalidTokenError as ex:
             logging.error(f'{addr} :: {ex}')
+            return False
+        except User.ObjectDoesNotExist:
+            logging.error(f'{addr} :: User does not exist.')
             return False
         else:
             return True

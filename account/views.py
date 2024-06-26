@@ -1,12 +1,7 @@
-import logging
-
 from django.contrib.auth import authenticate
-from rest_framework import mixins
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import User
 from .serializers import UserSerializer
 
 from account import Token
@@ -71,16 +66,7 @@ class RefreshTokenView(APIView):
                 )
 
             user_id = header['user_id']
-
-            # check if user of this id still exist
-            User.objects.get(pk=user_id)
-
             access, refresh = Token.generate(user_id)
-
-            return Response({
-                'access': access,
-                'refresh': refresh
-            })
         except Token.WrongTokenError as ex:
             return Response(
                 {
@@ -88,13 +74,11 @@ class RefreshTokenView(APIView):
                 },
                 status=403
             )
-        except User.ObjectDoesNotExist:
-            Response(
-                {
-                    'Error': 'User of this token does not exist.'
-                },
-                status=403
-            )
+        else:
+            return Response({
+                'access': access,
+                'refresh': refresh
+            })
 
 
 class UserDataView(APIView):
