@@ -1,8 +1,5 @@
 from datetime import datetime
-
-
-class WrongDatetime(Exception):
-    pass
+from .exceptions import WrongDatetime
 
 
 def getDatetime(date_str: str) -> datetime | None:

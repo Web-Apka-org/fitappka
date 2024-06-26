@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 
 from .serializers import UserSerializer
 
-from account import Token
-from account.Token import JWTPermission
+from extra import Token
+from extra.permissions import JWTPermission
 
 
 class TokenView(APIView):

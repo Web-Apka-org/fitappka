@@ -1,15 +1,15 @@
-import logging
 from datetime import datetime
 
-from rest_framework import mixins, generics
+from rest_framework import mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from account import Token
-from account.Token import JWTPermission
+from extra.Token import JWTPermission
 from .models import ConsumedFood
 from .serializers import ConsumedFoodSerializer
-from .utils import getDatetime, WrongDatetime
+from extra.utils import getDatetime
+from extra.exceptions import WrongDatetime
 
 
 class ConsumedFoodView(mixins.CreateModelMixin, APIView):
@@ -29,7 +29,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             It's recommended to always pass date in 'to' because date from
             server might be not the same as on client !
 
-            Time format: '%Y-%m-%d'
+            Date format: '%Y-%m-%d'
         '''
         date_from = datetime.now().replace(hour=0, minute=0, second=0)
         date_to = datetime.now().replace(hour=23, minute=59, second=59)
@@ -48,9 +48,8 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             user = Token.get_user(token)
             user_id = user.id
         except (
-                Token.WrongTokenError,
-                Token.UserDoesNotExist,
-                WrongDatetime
+            Token.WrongTokenError,
+            WrongDatetime
         ) as ex:
             return Response({
                 'Error': str(ex)
