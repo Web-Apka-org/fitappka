@@ -6,5 +6,5 @@ class UserDoesNotExist(Exception):
     pass
 
 
-class WrongDateFormat(Exception):
+class WrongDateFormatError(Exception):
     pass

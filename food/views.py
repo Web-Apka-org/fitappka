@@ -10,7 +10,7 @@ from .serializers import ConsumedFoodSerializer
 from extra import Token
 from extra.permissions import JWTPermission
 from extra.utils import getDatetime
-from extra.exceptions import WrongTokenError, WrongDateFormat
+from extra.exceptions import WrongTokenError, WrongDateFormatError
 
 
 class ConsumedFoodView(mixins.CreateModelMixin, APIView):
@@ -50,7 +50,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             user_id = user.id
         except (
             WrongTokenError,
-            WrongDateFormat
+            WrongDateFormatError
         ) as ex:
             return Response({
                 'Error': str(ex)

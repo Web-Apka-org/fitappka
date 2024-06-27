@@ -2,15 +2,16 @@ from datetime import datetime
 from .exceptions import WrongDateFormat
 
 
-def getDatetime(date_str: str) -> datetime | None:
-    len_date_str = len(date_str)
+def getDatetime(date_str: str, formats=['%Y-%m-%d']) -> datetime:
+    if not isinstance(formats, list):
+        raise TypeError('\'formats\' must be list.')
 
-    try:
-        if len_date_str == 10:
-            date = datetime.strptime(date_str, '%Y-%m-%d')
+    for format in formats:
+        try:
+            date = datetime.strptime(date_str, format)
+        except ValueError:
+            continue
         else:
-            raise ValueError('Incorrect date format. (accepted: %Y-%m-%d)')
-    except ValueError as ex:
-        raise WrongDateFormat(ex)
-    else:
-        return date
+            return date
+
+    raise WrongDateFormat(f'Incorrect date format (accepted: {formats})')
