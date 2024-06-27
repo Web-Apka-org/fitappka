@@ -1,5 +1,5 @@
 from datetime import datetime
-from .exceptions import WrongDateFormat
+from .exceptions import WrongDateFormatError
 
 
 def getDatetime(date_str: str, formats=['%Y-%m-%d']) -> datetime:
@@ -14,4 +14,4 @@ def getDatetime(date_str: str, formats=['%Y-%m-%d']) -> datetime:
         else:
             return date
 
-    raise WrongDateFormat(f'Incorrect date format (accepted: {formats})')
+    raise WrongDateFormatError(f'Incorrect date format (accepted: {formats})')
