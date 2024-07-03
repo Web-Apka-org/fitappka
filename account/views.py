@@ -40,8 +40,6 @@ class TokenView(APIView):
 
 
 class RefreshTokenView(APIView):
-    permission_classes = [JWTPermission]
-
     def get(self, request, *args, **kwargs):
         if 'HTTP_REFRESH_TOKEN' not in request.META:
             return Response(
@@ -53,7 +51,6 @@ class RefreshTokenView(APIView):
 
         token = request.META['HTTP_REFRESH_TOKEN']
 
-        user_id: int
         try:
             header = Token.decoded_header(token)
 
@@ -64,9 +61,6 @@ class RefreshTokenView(APIView):
                     },
                     status=403
                 )
-
-            user_id = header['user_id']
-            access, refresh = Token.generate(user_id)
         except Token.WrongTokenError as ex:
             return Response(
                 {
@@ -75,6 +69,9 @@ class RefreshTokenView(APIView):
                 status=403
             )
         else:
+            user_id = header['user_id']
+            access, refresh = Token.generate(user_id)
+
             return Response({
                 'access': access,
                 'refresh': refresh
@@ -83,7 +80,6 @@ class RefreshTokenView(APIView):
 
 class UserDataView(APIView):
     permission_classes = [JWTPermission]
-    serializer_class = UserSerializer
 
     def get(self, request, *args, **kwargs):
         token = self.request.META['HTTP_TOKEN']

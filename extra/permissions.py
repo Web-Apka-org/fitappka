@@ -42,7 +42,7 @@ class JWTPermission(BasePermission):
         except InvalidTokenError as ex:
             logging.error(f'{addr} :: {ex}')
             return False
-        except User.ObjectDoesNotExist:
+        except User.DoesNotExist:
             logging.error(f'{addr} :: User does not exist.')
             return False
         else:

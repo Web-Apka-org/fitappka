@@ -104,7 +104,7 @@ def get_user(token: str) -> User:
         user = User.objects.get(pk=header['user_id'])
     except InvalidTokenError as ex:
         raise WrongTokenError(ex)
-    except User.ObjectDoesNotExist:
+    except User.DoesNotExist:
         raise UserDoesNotExist('User does not exist.')
     else:
         return user
