@@ -45,19 +45,27 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
                 if 'from' not in request.GET:
                     date_from = getDatetime(request.GET['to'])
 
+            if date_from > date_to:
+                return Response(
+                    {
+                        'Error': 'Date \'from\' is later than date \'to\'.'
+                    },
+                    status=403
+                )
+
             token = request.META['HTTP_TOKEN']
             user = Token.get_user(token)
-            user_id = user.id
         except (
             WrongTokenError,
             WrongDateFormatError
         ) as ex:
             return Response({
-                'Error': str(ex)
+                'Error': str(ex),
+                status=403
             })
         else:
             data = ConsumedFood.objects.filter(
-                user_id=user_id,
+                user_id=user.id,
                 date_eating__range=(date_from, date_to)
             )
 
