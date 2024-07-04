@@ -15,7 +15,6 @@ from extra.exceptions import WrongTokenError, WrongDateFormatError
 
 class ConsumedFoodView(mixins.CreateModelMixin, APIView):
     permission_classes = [JWTPermission]
-    serializer_class = ConsumedFoodSerializer
 
     def get(self, request, *args, **kwargs):
         '''
@@ -59,10 +58,12 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             WrongTokenError,
             WrongDateFormatError
         ) as ex:
-            return Response({
-                'Error': str(ex),
+            return Response(
+                {
+                    'Error': str(ex),
+                },
                 status=403
-            })
+            )
         else:
             data = ConsumedFood.objects.filter(
                 user_id=user.id,
@@ -73,6 +74,10 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             return Response(context.data)
 
     def post(self, request, *args, **kwargs):
+        '''
+        Create new record in ConsumedFood table.
+        Accepted date format: %Y-%m-%d,%H:%M
+        '''
         try:
             token = request.META['HTTP_TOKEN']
             Token.get_user(token)
@@ -97,6 +102,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
         return self.create(request, *args, **kwargs)
 
     # only for testing
+    # return all records in ConsumedFood table
     def put(self, request, *args, **kwargs):
         token = request.META['HTTP_TOKEN']
         user = Token.get_user(token)
