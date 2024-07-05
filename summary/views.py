@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from food.models import ConsumedFood
 
 from extra import Token
-from extra.utils import getDatetime
+from extra.utils import getDatetime, ErrorResponse
 from extra.permissions import JWTPermission
 from extra.exceptions import WrongDateFormatError, WrongTokenError
 
@@ -75,26 +75,16 @@ class SummaryView(APIView):
 
                 if not from_str:
                     date_from = getDatetime(to_str, formats)
-            
+
             if date_from > date_to:
-                return Response(
-                    {
-                        'Error': 'Date \'from\' is later than date \'to\'.'
-                    },
-                    status=403
-                )
+                return ErrorResponse('Date \'from\' is later than date \'to\'.')
 
             header = Token.decode_header(token)
         except (
             WrongDateFormatError,
             WrongTokenError
         ) as ex:
-            return Response(
-                {
-                    'Error': str(ex),
-                },
-                status=403
-            )
+            return ErrorResponse(ex)
         else:
             consumed_foods = ConsumedFood.objects.filter(
                 date_eating__range=(date_from, date_to),

@@ -5,18 +5,14 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 
 from extra import Token
+from extra.utils import ErrorResponse
 from extra.permissions import JWTPermission
 
 
 class TokenView(APIView):
     def post(self, request, *args, **kwargs):
         if not request.POST.keys() >= {'username', 'email', 'password'}:
-            return Response(
-                {
-                    'Error': 'Missing username, email or password in form.'
-                },
-                status=403
-            )
+            return ErrorResponse('Missing username, email or password in form.')
 
         username = request.POST['username']
         email = request.POST['email']
@@ -24,12 +20,7 @@ class TokenView(APIView):
 
         user = authenticate(username=username, email=email, password=password)
         if user is None:
-            return Response(
-                {
-                    'Error': 'credientials are invalid.'
-                },
-                status=403
-            )
+            return ErrorResponse('credientials are invalid.')
         else:
             access, refresh = Token.generate(user.id)
 
@@ -42,32 +33,19 @@ class TokenView(APIView):
 class RefreshTokenView(APIView):
     def get(self, request, *args, **kwargs):
         if 'HTTP_REFRESH_TOKEN' not in request.META:
-            return Response(
-                {
-                    'Error': 'No refresh token in HTTP header.'
-                },
-                status=403
-            )
+            return ErrorResponse('No refresh token in HTTP header.')
 
         token = request.META['HTTP_REFRESH_TOKEN']
 
         try:
-            header = Token.decoded_header(token)
+            header = Token.decode_header(token)
 
             if header['for'] != 'refresh':
-                return Response(
-                    {
-                        'Error': 'Wrong token type, only refresh token accepted'
-                    },
-                    status=403
+                return ErrorResponse(
+                    'Wrong token type, only refresh token accepted'
                 )
         except Token.WrongTokenError as ex:
-            return Response(
-                {
-                    'Error': str(ex)
-                },
-                status=403
-            )
+            return ErrorResponse(ex)
         else:
             user_id = header['user_id']
             access, refresh = Token.generate(user_id)
@@ -90,12 +68,7 @@ class UserDataView(APIView):
 
             return Response(user_data.data)
         except Token.WrongTokenError as ex:
-            return Response(
-                {
-                    'Error': str(ex)
-                },
-                status=403
-            )
+            return ErrorResponse(ex)
 
 
 # class RegisterPage(FormView):
