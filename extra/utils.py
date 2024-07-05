@@ -20,5 +20,10 @@ def getDatetime(date_str: str, formats=['%Y-%m-%d']) -> datetime:
     raise WrongDateFormatError(f'Incorrect date format (accepted: {formats})')
 
 
-def ErrorResponse(message=None, status=403):
-    return Response(message, status=status)
+def ErrorResponse(message: str = None, status=403):
+    return Response(
+        {
+            'Error': str(message)
+        },
+        status=status
+    )

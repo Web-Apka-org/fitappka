@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from rest_framework import mixins
+from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -9,12 +10,15 @@ from .serializers import ConsumedFoodSerializer
 
 from extra import Token
 from extra.permissions import JWTPermission
-from extra.utils import getDatetime
+from extra.utils import getDatetime, ErrorResponse
 from extra.exceptions import WrongTokenError, WrongDateFormatError
 
 
-class ConsumedFoodView(mixins.CreateModelMixin, APIView):
+class ConsumedFoodView(mixins.CreateModelMixin,
+                       mixins.DestroyModelMixin,
+                       GenericAPIView):
     permission_classes = [JWTPermission]
+    serializer_class = ConsumedFoodSerializer
 
     def get(self, request, *args, **kwargs):
         '''
@@ -45,12 +49,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
                     date_from = getDatetime(request.GET['to'])
 
             if date_from > date_to:
-                return Response(
-                    {
-                        'Error': 'Date \'from\' is later than date \'to\'.'
-                    },
-                    status=403
-                )
+                return ErrorResponse('Date \'from\' is later than date \'to\'.')
 
             token = request.META['HTTP_TOKEN']
             user = Token.get_user(token)
@@ -58,12 +57,7 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
             WrongTokenError,
             WrongDateFormatError
         ) as ex:
-            return Response(
-                {
-                    'Error': str(ex),
-                },
-                status=403
-            )
+            return ErrorResponse(ex)
         else:
             data = ConsumedFood.objects.filter(
                 user_id=user.id,
@@ -78,28 +72,28 @@ class ConsumedFoodView(mixins.CreateModelMixin, APIView):
         Create new record in ConsumedFood table.
         Accepted date format: %Y-%m-%d,%H:%M
         '''
-        try:
-            token = request.META['HTTP_TOKEN']
-            Token.get_user(token)
-        except (
-            WrongTokenError
-        ) as ex:
-            return Response(
-                {
-                    'Error': str(ex)
-                },
-                status=403
-            )
-
         if len(request.POST['date_eating']) != 16:
-            return Response(
-                {
-                    'Error': 'Incorrect date format. (accepted: %Y-%m-%d,%H:%M)'
-                },
-                status=403
-            )
+            return ErrorResponse('Incorrect date format. (accepted: %Y-%m-%d,%H:%M)')
 
         return self.create(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        token = request.META['HTTP_TOKEN']
+
+        try:
+            user = Token.get_user(token)
+        except WrongTokenError as ex:
+            return ErrorResponse(ex)
+        else:
+            self.queryset = ConsumedFood.objects.filter(
+                user=user,
+                pk=request.GET['pk']
+            )
+
+            if self.queryset is None:
+                return ErrorResponse('No record with this ID.')
+
+            return self.destroy(request, *args, **kwargs)
 
     # only for testing
     # return all records in ConsumedFood table
