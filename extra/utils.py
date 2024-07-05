@@ -1,4 +1,7 @@
 from datetime import datetime
+
+from rest_framework.response import Response
+
 from .exceptions import WrongDateFormatError
 
 
@@ -15,3 +18,7 @@ def getDatetime(date_str: str, formats=['%Y-%m-%d']) -> datetime:
             return date
 
     raise WrongDateFormatError(f'Incorrect date format (accepted: {formats})')
+
+
+def ErrorResponse(message=None, status=403):
+    return Response(message, status=status)
