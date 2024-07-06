@@ -71,6 +71,9 @@ class UserDataView(APIView):
             return ErrorResponse(ex)
 
 
+class RegisterView(mixins.CreateModelMixin, GenericAPIView):
+    permission_classes = [JWTPermission]
+    serializer_class = RegisterSerializer
 # class RegisterPage(FormView):
 #     template_name = "register.html"
 #     form_class = SignupForm

@@ -13,8 +13,8 @@ class User(AbstractUser):
         max_length=30,
         unique=True,
         help_text=_(
-            'Required. 150 characters or fewer. '
-            'Letters, digits and @/./+/-/_ only.'
+            'Required. Letters, digits and @/./+/-/_ only. '
+            '(max 30 characters)'
         ),
         validators=[UnicodeUsernameValidator],
         error_messages={
