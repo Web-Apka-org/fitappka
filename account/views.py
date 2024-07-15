@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, RegisterSerializer
 
 from extra import Token
 from extra.utils import ErrorResponse
@@ -71,9 +72,15 @@ class UserDataView(APIView):
             return ErrorResponse(ex)
 
 
-class RegisterView(mixins.CreateModelMixin, GenericAPIView):
-    permission_classes = [JWTPermission]
+class RegisterView(CreateAPIView):
     serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=201)
+
 # class RegisterPage(FormView):
 #     template_name = "register.html"
 #     form_class = SignupForm

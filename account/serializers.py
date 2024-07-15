@@ -1,5 +1,9 @@
 from rest_framework import serializers
+from rest_framework.response import Response
+
 from .models import User
+from .validators import email_validators, username_validators, \
+                        password_validators
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,6 +23,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(min_length=4, max_length=30)
-    email = serializers.EmailField()
-    password1 = serializers.CharField(min_length=8)
+    username = serializers.CharField(validators=username_validators)
+    email = serializers.EmailField(validators=email_validators)
+    password = serializers.CharField(validators=password_validators)
+
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
