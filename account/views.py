@@ -72,11 +72,9 @@ class UserDataView(APIView):
             return ErrorResponse(ex)
 
 
-class RegisterView(CreateAPIView):
-    serializer_class = RegisterSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+class RegisterView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=201)
