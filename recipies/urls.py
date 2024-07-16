@@ -1,6 +1,8 @@
 from django.urls import path
 
-# urlpatterns = [
-#     path('/',),
-#     path('/<int:pk>/'),
-# ]
+from .views import RecipiesView
+
+urlpatterns = [
+    path('', RecipiesView.as_view()),
+    # path('/<int:pk>/'),
+]
