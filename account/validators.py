@@ -1,7 +1,7 @@
 import re
 
 from django.core.exceptions import ValidationError
-from django.core.validators import  MaxLengthValidator, \
+from django.core.validators import MaxLengthValidator, \
                             MinLengthValidator, EmailValidator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 

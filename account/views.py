@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import GenericAPIView
 
 from .serializers import UserSerializer, RegisterSerializer
 
 from extra import Token
+from extra.views import CreateModelMixinEmptyResponse
 from extra.utils import ErrorResponse
 from extra.permissions import JWTPermission
 
@@ -72,12 +73,11 @@ class UserDataView(APIView):
             return ErrorResponse(ex)
 
 
-class RegisterView(APIView):
+class RegisterView(CreateModelMixinEmptyResponse, GenericAPIView):
+    serializer_class = RegisterSerializer
+
     def post(self, request, *args, **kwargs):
-        serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=201)
+        return self.create(request, *args, **kwargs)
 
 # class RegisterPage(FormView):
 #     template_name = "register.html"
