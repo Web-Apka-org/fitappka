@@ -5,4 +5,4 @@ from .models import ConsumedFood
 class ConsumedFoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConsumedFood
-        exclude = ['id']
+        fields = '__all__'

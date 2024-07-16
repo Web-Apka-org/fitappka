@@ -5,6 +5,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('food/', include('food.urls')),
     path('account/', include('account.urls')),
-    # path('recipies/', include('recipies.urls')),
+    path('summary/', include('summary.urls')),
     # path('user_rating/', include('user_rating.urls')),
+    path('recipies/', include('recipies.urls')),
 ]
