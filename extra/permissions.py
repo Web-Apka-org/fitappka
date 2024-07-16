@@ -1,10 +1,11 @@
 import logging
-from jwt import InvalidTokenError
 
 from rest_framework.permissions import BasePermission
 
 from account.models import User
+
 from . import Token
+from .exceptions import WrongTokenError
 
 
 class JWTPermission(BasePermission):
@@ -39,7 +40,7 @@ class JWTPermission(BasePermission):
             if header['for'] != 'access':
                 logging.error(f'{addr} :: This is not access token.')
                 return False
-        except InvalidTokenError as ex:
+        except WrongTokenError as ex:
             logging.error(f'{addr} :: {ex}')
             return False
         except User.DoesNotExist:
