@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.response import Response
 
 from .models import User
 from .validators import email_validators, username_validators, \
@@ -18,8 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = User
-        fields = ['username', 'email']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'username', 'email']
+        # extra_kwargs = {'password': {'write_only': True}}
 
 
 class RegisterSerializer(serializers.Serializer):

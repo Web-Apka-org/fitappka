@@ -94,7 +94,7 @@ def get_user(token: str) -> User:
     '''
     Return User model instance from token.
 
-    Throws TypeError and UserDoesNotExist exceptions.
+    Throws TypeError, WrongTokenError and UserDoesNotExist exceptions.
     '''
     if not isinstance(token, str):
         raise TypeError('token must be str.')

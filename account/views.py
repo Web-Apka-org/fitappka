@@ -1,3 +1,4 @@
+import logging
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -34,10 +35,11 @@ class TokenView(APIView):
 
 class RefreshTokenView(APIView):
     def get(self, request, *args, **kwargs):
-        if 'HTTP_REFRESH_TOKEN' not in request.META:
+        logging.info(request.META)
+        if 'HTTP_REFRESH' not in request.META:
             return ErrorResponse('No refresh token in HTTP header.')
 
-        token = request.META['HTTP_REFRESH_TOKEN']
+        token = request.META['HTTP_REFRESH']
 
         try:
             header = Token.decode_header(token)
