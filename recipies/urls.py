@@ -1,8 +1,7 @@
 from django.urls import path
 
-from .views import Recipies, RecipiesUpdate
+from .views import RecipiesView
 
 urlpatterns = [
-    path('', Recipies.as_view()),
-    path('update/', RecipiesUpdate.as_view())
+    path('', RecipiesView.as_view())
 ]
