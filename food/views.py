@@ -2,7 +2,6 @@ from datetime import datetime
 
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
-from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import ConsumedFood
@@ -69,13 +68,33 @@ class ConsumedFoodView(mixins.CreateModelMixin,
 
     def post(self, request, *args, **kwargs):
         '''
-        Create new record in ConsumedFood table.
+        Create or update record in ConsumedFood table.
         Accepted date format: %Y-%m-%d,%H:%M
         '''
+        date_eating = request.POST['date_eating']
         if len(request.POST['date_eating']) != 16:
-            return ErrorResponse('Incorrect date format. (accepted: %Y-%m-%d,%H:%M)')
+            return ErrorResponse(
+                'Incorrect date format. (accepted: %Y-%m-%d,%H:%M)'
+            )
 
-        return self.create(request, *args, **kwargs)
+        token = request.META['HTTP_TOKEN']
+        food = request.POST['food']
+
+        try:
+            user = Token.get_user(token)
+        except WrongTokenError as ex:
+            return ErrorResponse(ex)
+        else:
+            ConsumedFood.objects.update_or_create(
+                user=user,
+                default={
+                    user: user,
+                    food: food,
+                    date_eating: date_eating
+                }
+            )
+
+        return Response(status=201)
 
     def delete(self, request, *args, **kwargs):
         token = request.META['HTTP_TOKEN']
@@ -87,7 +106,7 @@ class ConsumedFoodView(mixins.CreateModelMixin,
         else:
             self.queryset = ConsumedFood.objects.filter(
                 user=user,
-                pk=request.GET['pk']
+                pk=request.GET['id']
             )
 
             if self.queryset is None:
