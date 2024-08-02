@@ -97,6 +97,13 @@ class ConsumedFoodView(mixins.CreateModelMixin,
         return Response(status=201)
 
     def delete(self, request, *args, **kwargs):
+        '''
+        Delete record from ConsumedFood table.
+        Record are deleted by passed 'id'.
+        '''
+        if 'id' not in request.GET:
+            return ErrorResponse('No ID of Consumed Food passed.')
+
         token = request.META['HTTP_TOKEN']
 
         try:
