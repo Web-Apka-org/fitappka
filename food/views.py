@@ -4,7 +4,7 @@ from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from .models import ConsumedFood
+from .models import ConsumedFood, Food
 from .serializers import ConsumedFoodSerializer
 
 from extra import Token
@@ -71,6 +71,9 @@ class ConsumedFoodView(mixins.CreateModelMixin,
         Create or update record in ConsumedFood table.
         Accepted date format: %Y-%m-%d,%H:%M
         '''
+        if not request.POST.keys() >= {'food_id', 'date_eating'}:
+            return ErrorResponse('Missing food_id or date_eating in form.')
+
         date_eating = request.POST['date_eating']
         if len(request.POST['date_eating']) != 16:
             return ErrorResponse(
@@ -78,21 +81,36 @@ class ConsumedFoodView(mixins.CreateModelMixin,
             )
 
         token = request.META['HTTP_TOKEN']
-        food = request.POST['food']
+        food = Food.objects.get(pk=request.POST['food_id'])
 
         try:
             user = Token.get_user(token)
         except WrongTokenError as ex:
             return ErrorResponse(ex)
         else:
-            ConsumedFood.objects.update_or_create(
-                user=user,
-                default={
-                    user: user,
-                    food: food,
-                    date_eating: date_eating
-                }
-            )
+            if 'id' in request.POST:
+                id = request.POST['id']
+                try:
+                    consumed_food = ConsumedFood.objects.filter(
+                        pk=id
+                    )
+                except ConsumedFood.DoesNotExist:
+                    return ErrorResponse(
+                        'Failed to update ConsumedFood, wrong ID.'
+                    )
+                else:
+                    consumed_food.update(
+                        id=id,
+                        user=user,
+                        food=food,
+                        date_eating=date_eating
+                    )
+            else:
+                ConsumedFood.objects.create(
+                    user=user,
+                    food=food,
+                    date_eating=date_eating
+                )
 
         return Response(status=201)
 
