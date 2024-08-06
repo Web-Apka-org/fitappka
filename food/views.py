@@ -70,6 +70,8 @@ class ConsumedFoodView(mixins.CreateModelMixin,
         '''
         Create or update record in ConsumedFood table.
         Accepted date format: %Y-%m-%d,%H:%M
+
+        For update you should post 'id' parameter.
         '''
         if not request.POST.keys() >= {'food_id', 'date_eating'}:
             return ErrorResponse('Missing food_id or date_eating in form.')
