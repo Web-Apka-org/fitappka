@@ -27,7 +27,7 @@ class RecipiesView(APIView):
 
         try:
             user = Token.get_user(token)
-            food = Food.objects.get(pk=request.POST['food'])
+            food = Food.objects.get(pk=request.POST['food_id'])
 
             data = serializer.data
             data.update({
@@ -39,7 +39,7 @@ class RecipiesView(APIView):
         except (
             UserDoesNotExist,
             WrongTokenError,
-            ValueError
+            # ValueError
         ) as ex:
             return ErrorResponse(ex)
         except Food.DoesNotExist:

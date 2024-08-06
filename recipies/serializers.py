@@ -12,7 +12,7 @@ class RecipieSerializer(serializers.ModelSerializer):
 class RecipieModifySerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipie
-        fields = ['title', 'content']
+        fields = ['food_id', 'title', 'content']
 
     # def create(self, validated_data):
     #     pass
