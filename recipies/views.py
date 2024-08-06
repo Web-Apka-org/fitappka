@@ -39,10 +39,21 @@ class RecipiesView(APIView):
         except (
             UserDoesNotExist,
             WrongTokenError,
-            # ValueError
+            ValueError
         ) as ex:
             return ErrorResponse(ex)
         except Food.DoesNotExist:
             return ErrorResponse('Food of this ID does not exists.')
 
         return Response(status=201)
+
+    def delete(self, request, *args, **kwargs):
+        if 'id' not in request.GET:
+            return ErrorResponse('No ID of Recipie passed.')
+
+        try:
+            recipie = Recipie.objects.filter(pk=request.GET['id'])
+            recipie.delete()
+            return Response(status=204)
+        except Recipie.DoesNotExist:
+            return ErrorResponse('Recipie of this ID does not exists.')
