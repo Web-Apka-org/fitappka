@@ -52,8 +52,10 @@ class RecipiesView(APIView):
             return ErrorResponse('No ID of Recipie passed.')
 
         try:
-            recipie = Recipie.objects.filter(pk=request.GET['id'])
+            recipie = Recipie.objects.get(pk=request.GET['id'])
             recipie.delete()
             return Response(status=204)
         except Recipie.DoesNotExist:
             return ErrorResponse('Recipie of this ID does not exists.')
+        except ValueError as ex:
+            return ErrorResponse(ex)
