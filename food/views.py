@@ -13,11 +13,8 @@ from extra.utils import getDatetime, ErrorResponse
 from extra.exceptions import WrongTokenError, WrongDateFormatError
 
 
-class ConsumedFoodView(mixins.CreateModelMixin,
-                       mixins.DestroyModelMixin,
-                       GenericAPIView):
+class ConsumedFoodView(APIView):
     permission_classes = [JWTPermission]
-    serializer_class = ConsumedFoodSerializer
 
     def get(self, request, *args, **kwargs):
         '''
@@ -128,18 +125,21 @@ class ConsumedFoodView(mixins.CreateModelMixin,
 
         try:
             user = Token.get_user(token)
-        except WrongTokenError as ex:
-            return ErrorResponse(ex)
-        else:
-            self.queryset = ConsumedFood.objects.filter(
+
+            consumed_food = ConsumedFood.objects.get(
                 user=user,
                 pk=request.GET['id']
             )
-
-            if self.queryset is None:
-                return ErrorResponse('No record with this ID.')
-
-            return self.destroy(request, *args, **kwargs)
+        except (
+            WrongTokenError,
+            ValueError
+        ) as ex:
+            return ErrorResponse(ex)
+        except ConsumedFood.DoesNotExist:
+            return ErrorResponse('Consumed Food of this ID does not exists.')
+        else:
+            consumed_food.delete()
+            return Response(status=204)
 
     # only for testing
     # return all records in ConsumedFood table
