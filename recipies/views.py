@@ -51,11 +51,18 @@ class RecipiesView(APIView):
         if 'id' not in request.GET:
             return ErrorResponse('No ID of Recipie passed.')
 
+        token = request.META['HTTP_TOKEN']
+
         try:
-            recipie = Recipie.objects.get(pk=request.GET['id'])
+            user = Token.get_user(token)
+            recipie = Recipie.objects.get(user=user, pk=request.GET['id'])
             recipie.delete()
             return Response(status=204)
+        except (
+            UserDoesNotExist,
+            WrongTokenError,
+            ValueError
+        )as ex:
+            return ErrorResponse(ex)
         except Recipie.DoesNotExist:
             return ErrorResponse('Recipie of this ID does not exists.')
-        except ValueError as ex:
-            return ErrorResponse(ex)

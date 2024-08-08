@@ -129,7 +129,6 @@ class ConsumedFoodView(APIView):
 
         try:
             user = Token.get_user(token)
-
             consumed_food = ConsumedFood.objects.get(
                 user=user,
                 pk=request.GET['id']

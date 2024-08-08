@@ -55,11 +55,18 @@ class UserRatingView(APIView):
         if 'id' not in request.GET:
             return ErrorResponse('No ID of User Rating passed.')
 
+        token = request.META['HTTP_TOKEN']
+
         try:
-            user_rating = UserRating.objects.get(pk=request.GET['id'])
+            user = Token.get_user(token)
+            user_rating = UserRating.objects.get(user=user, pk=request.GET['id'])
             user_rating.delete()
             return Response(status=204)
+        except (
+            UserDoesNotExist,
+            WrongTokenError,
+            ValueError
+        )as ex:
+            return ErrorResponse(ex)
         except UserRating.DoesNotExist:
             return ErrorResponse('User Rating of this ID does not exists.')
-        except ValueError as ex:
-            return ErrorResponse(ex)
