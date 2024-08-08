@@ -10,7 +10,11 @@ from .serializers import ConsumedFoodSerializer
 from extra import Token
 from extra.permissions import JWTPermission
 from extra.utils import getDatetime, ErrorResponse
-from extra.exceptions import WrongTokenError, WrongDateFormatError
+from extra.exceptions import (
+        WrongTokenError, 
+        WrongDateFormatError, 
+        UserDoesNotExist
+    )
 
 
 class ConsumedFoodView(APIView):
@@ -131,6 +135,7 @@ class ConsumedFoodView(APIView):
                 pk=request.GET['id']
             )
         except (
+            UserDoesNotExist,
             WrongTokenError,
             ValueError
         ) as ex:
